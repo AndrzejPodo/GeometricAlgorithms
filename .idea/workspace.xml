@@ -1,14 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="b0857c59-605f-4f09-93f6-8dc7ee0870f0" name="Default Changelist" comment="" />
+    <list default="true" id="b0857c59-605f-4f09-93f6-8dc7ee0870f0" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebooks/lab1.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/lab1.ipynb" afterDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="ProjectId" id="1Sl9l78HjZE1XoYpiRDXw3MBm3X" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/notebooks" />
@@ -93,11 +100,47 @@
       <option name="presentableId" value="Default" />
       <updated>1572127462139</updated>
       <workItem from="1572127475872" duration="3507000" />
-      <workItem from="1572169801623" duration="2875000" />
+      <workItem from="1572169801623" duration="4237000" />
+      <workItem from="1572301106452" duration="2082000" />
+      <workItem from="1572348830549" duration="721000" />
+      <workItem from="1572352869534" duration="574000" />
+      <workItem from="1572428254941" duration="342000" />
+      <workItem from="1572441430504" duration="763000" />
+      <workItem from="1572781246551" duration="1575000" />
+      <workItem from="1572782859134" duration="400000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="jupyter-line">
+          <url>file://$PROJECT_DIR$/notebooks/lab1.ipynb</url>
+          <line>217</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="jupyter-line">
+          <url>file://$PROJECT_DIR$/notebooks/lab1.ipynb</url>
+          <line>232</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
