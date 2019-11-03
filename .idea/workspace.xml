@@ -108,6 +108,8 @@
       <workItem from="1572441430504" duration="763000" />
       <workItem from="1572781246551" duration="1575000" />
       <workItem from="1572782859134" duration="400000" />
+      <workItem from="1572803847274" duration="769000" />
+      <workItem from="1572815496978" duration="1089000" />
     </task>
     <servers />
   </component>
@@ -126,21 +128,5 @@
         </entry>
       </map>
     </option>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="jupyter-line">
-          <url>file://$PROJECT_DIR$/notebooks/lab1.ipynb</url>
-          <line>217</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="jupyter-line">
-          <url>file://$PROJECT_DIR$/notebooks/lab1.ipynb</url>
-          <line>232</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
   </component>
 </project>
