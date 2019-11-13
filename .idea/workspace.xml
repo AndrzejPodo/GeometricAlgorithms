@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="b0857c59-605f-4f09-93f6-8dc7ee0870f0" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebooks/lab1.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebooks/lab1.ipynb" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -17,6 +16,7 @@
   <component name="ProjectId" id="1Sl9l78HjZE1XoYpiRDXw3MBm3X" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/notebooks" />
     <property name="node.js.detected.package.eslint" value="true" />
@@ -110,6 +110,9 @@
       <workItem from="1572782859134" duration="400000" />
       <workItem from="1572803847274" duration="769000" />
       <workItem from="1572815496978" duration="1089000" />
+      <workItem from="1572957098470" duration="222000" />
+      <workItem from="1572965634109" duration="751000" />
+      <workItem from="1573077193093" duration="833000" />
     </task>
     <servers />
   </component>
