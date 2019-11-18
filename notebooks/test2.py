@@ -131,8 +131,8 @@ def swipe(lines):
             event = heapq.heappop(intersection_heap)[1]
         else:
             event = heapq.heappop(event_heap)[1]
-        print(event.x)
-        print(list(map(lambda line: line.line, state_set)))
+        
+
         if isinstance(event, StartOfLine):
             state.set_x(event.x)
             state_set.add(event.line)
@@ -153,6 +153,15 @@ def swipe(lines):
                     heapq.heappush(intersection_heap, (point[0], LinesIntersection(point[0], [state_set[i], state_set[i+1]])))        
         
         elif isinstance(event, EndOfLine):
+            i = state_set.index(event.line)
+            if i > 0 and i < (len(state_set)-1) and not ((state_set[i-1].id, state_set[i+1].id) in checked_intersections):
+                in_range, point = intersect(state_set[i-1].line, state_set[i+1].line)
+                checked_intersections.add((state_set[i-1].id, state_set[i+1].id))
+                checked_intersections.add((state_set[i+1].id, state_set[i-1].id))
+                if in_range:
+                    result.add(point)
+                    heapq.heappush(intersection_heap, (point[0], LinesIntersection(point[0], [state_set[i-1], state_set[i+1]])))
+
             del state_set[state_set.index(event.line)]
         
         else:
@@ -199,11 +208,17 @@ def swipe(lines):
                 if in_range and point[0] > state.get_x():
                     result.add(point)
                     heapq.heappush(intersection_heap, (point[0], LinesIntersection(point[0], [state_set[idx_a], state_set[idx_a-1]])))
+        
+        print(event.x)
+        print(list(map(lambda line: line.line, state_set)))
+
     return result
 
 #lines = [[(0,0),(3,3)],[(0,3),(3,0)],[(1.5,2),(3,2)]]
 #lines = [[(0,2),(7,2)],[(0,1),(7,3)],[(3,0),(7,5)]]
 #lines = [[(1,-2),(3,7)],[(0,2),(8,4)],[(1,5),(9,-4)],[(3,3),(11,7)],[(4,5),(6,3)],[(-1,6),(12,6)]]
 #lines = [[(0,2),(8,4)],[(1,5),(9,-4)],[(3,3),(11,7)]]
-lines = [[(1,1),(5,2)],[(1,3),(5,5)],[(1,2),(5,1)],[(1,5),(5,3)]]
+#lines = [[(1,1),(5,2)],[(1,3),(5,5)],[(1,2),(5,1)],[(1,5),(5,3)]]
+#lines = [[(0,0),(6,4)],[(4,4),(10,0)],[(-1,2),(5,-2)],[(3,-2),(9,2)],[(3,1),(5,1)]]
+lines = [[(4,4),(10,0)],[(3,-2),(9,2)],[(-1,2),(5,-2)],[(0,0),(6,4)],[(3,1),(5,1)]]
 print(swipe(lines))
