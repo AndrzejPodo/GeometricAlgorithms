@@ -65,11 +65,12 @@ class LinesIntersection(Event):
         self.lines = lines
         
 class Line:
-    def __init__(self, line):
+    def __init__(self, line, id):
         self.line = line
         slope, intercept, r_value, p_value, std_err = linregress([line[0][0],line[1][0]],[line[0][1],line[1][1]])
         self.slope = slope
         self.intercept = intercept
+        self.id = id
     def get_y(self, x):
         return self.slope*x+self.intercept
 
@@ -90,7 +91,7 @@ class SwipeState:
         
 def swipe(lines):
     result = set([])
-    lines = list(map(lambda line: Line(line), lines))
+    lines = [Line(line, i) for i, line in enumerate(lines)]
     start_of_lines = list(map(lambda line: StartOfLine(line.line[0][0], line), lines))
     end_of_lines = list(map(lambda line: EndOfLine(line.line[1][0], line), lines))
     
@@ -123,6 +124,7 @@ def swipe(lines):
             return 1
 
     state_set = SortedSet(key = functools.cmp_to_key(comarator))
+    checked_intersections = set([])
 
     while event_heap or intersection_heap:
         if len(intersection_heap) > 0 and intersection_heap[0][0] <= event_heap[0][0]+0.0001:
@@ -135,16 +137,20 @@ def swipe(lines):
             state.set_x(event.x)
             state_set.add(event.line)
             i = state_set.index(event.line)
-            if i > 0:
+            if i > 0 and not ((state_set[i].id, state_set[i-1].id) in checked_intersections):
                 in_range, point = intersect(state_set[i].line, state_set[i-1].line)
+                checked_intersections.add((state_set[i].id, state_set[i-1].id))
+                checked_intersections.add((state_set[i-1].id, state_set[i].id))
                 if in_range:
                     result.add(point)
                     heapq.heappush(intersection_heap, (point[0], LinesIntersection(point[0], [state_set[i], state_set[i-1]])))
-            if i < (len(state_set)-1):
-                in_range, point = intersect(state_set[i].line, state_set[i+1].line) 
+            if i < (len(state_set)-1) and not ((state_set[i].id, state_set[i+1].id) in checked_intersections):
+                in_range, point = intersect(state_set[i].line, state_set[i+1].line)
+                checked_intersections.add((state_set[i].id, state_set[i+1].id))
+                checked_intersections.add((state_set[i+1].id, state_set[i].id))
                 if in_range:
                     result.add(point)
-                    heapq.heappush(intersection_heap, (point[0], LinesIntersection(point[0], [state_set[i], state_set[i+1]])))
+                    heapq.heappush(intersection_heap, (point[0], LinesIntersection(point[0], [state_set[i], state_set[i+1]])))        
         
         elif isinstance(event, EndOfLine):
             del state_set[state_set.index(event.line)]
@@ -161,33 +167,43 @@ def swipe(lines):
             state_set.add(line_b)
             idx_a = state_set.index(line_a)
             idx_b = state_set.index(line_b)
-            if idx_a > idx_b:
-                if idx_a < (len(state_set)-1):
-                    in_range, point = intersect(state_set[idx_a].line, state_set[idx_a+1].line)
-                    if in_range and point[0] > state.get_x():
-                        result.add(point)
-                        heapq.heappush(intersection_heap, (point[0], LinesIntersection(point[0], [state_set[idx_a], state_set[idx_a+1]])))
-                if idx_b > 0:
-                    in_range, point = intersect(state_set[idx_b].line, state_set[idx_b-1].line)
-                    if in_range and point[0] > state.get_x():
-                        result.add(point)
-                        heapq.heappush(intersection_heap, (point[0], LinesIntersection(point[0], [state_set[idx_b], state_set[idx_b-1]])))
-            else:
-                if idx_b < (len(state_set)-1):
-                    in_range, point = intersect(state_set[idx_b].line, state_set[idx_b+1].line)
-                    if in_range and point[0] > state.get_x():
-                        result.add(point)
-                        heapq.heappush(intersection_heap, (point[0], LinesIntersection(point[0], [state_set[idx_b], state_set[idx_b+1]])))
-                if idx_a > 0:
-                    in_range, point = intersect(state_set[idx_a].line, state_set[idx_a-1].line)
-                    if in_range and point[0] > state.get_x():
-                        result.add(point)
-                        heapq.heappush(intersection_heap, (point[0], LinesIntersection(point[0], [state_set[idx_a], state_set[idx_a-1]])))
+
+            if idx_a < (len(state_set)-1) and not ((state_set[idx_a].id, state_set[idx_a+1].id) in checked_intersections):
+                in_range, point = intersect(state_set[idx_a].line, state_set[idx_a+1].line)
+                checked_intersections.add((state_set[idx_a].id, state_set[idx_a+1].id))
+                checked_intersections.add((state_set[idx_a+1].id, state_set[idx_a].id))
+                if in_range and point[0] > state.get_x():
+                    result.add(point)
+                    heapq.heappush(intersection_heap, (point[0], LinesIntersection(point[0], [state_set[idx_a], state_set[idx_a+1]])))
+
+            if idx_b > 0 and not ((state_set[idx_b].id, state_set[idx_b-1].id) in checked_intersections):
+                in_range, point = intersect(state_set[idx_b].line, state_set[idx_b-1].line)
+                checked_intersections.add((state_set[idx_b].id, state_set[idx_b-1].id))
+                checked_intersections.add((state_set[idx_b-1].id, state_set[idx_b].id))
+                if in_range and point[0] > state.get_x():
+                    result.add(point)
+                    heapq.heappush(intersection_heap, (point[0], LinesIntersection(point[0], [state_set[idx_b], state_set[idx_b-1]])))
+
+            if idx_b < (len(state_set)-1) and not ((state_set[idx_b].id, state_set[idx_b+1].id) in checked_intersections):
+                in_range, point = intersect(state_set[idx_b].line, state_set[idx_b+1].line)
+                checked_intersections.add((state_set[idx_b].id, state_set[idx_b+1].id))
+                checked_intersections.add((state_set[idx_b+1].id, state_set[idx_b].id))
+                if in_range and point[0] > state.get_x():
+                    result.add(point)
+                    heapq.heappush(intersection_heap, (point[0], LinesIntersection(point[0], [state_set[idx_b], state_set[idx_b+1]])))
+
+            if idx_a > 0 and not ((state_set[idx_a].id, state_set[idx_a-1].id) in checked_intersections):
+                in_range, point = intersect(state_set[idx_a].line, state_set[idx_a-1].line)
+                checked_intersections.add((state_set[idx_a].id, state_set[idx_a-1].id))
+                checked_intersections.add((state_set[idx_a-1].id, state_set[idx_a].id))
+                if in_range and point[0] > state.get_x():
+                    result.add(point)
+                    heapq.heappush(intersection_heap, (point[0], LinesIntersection(point[0], [state_set[idx_a], state_set[idx_a-1]])))
     return result
 
 #lines = [[(0,0),(3,3)],[(0,3),(3,0)],[(1.5,2),(3,2)]]
-lines = [[(0,2),(7,2)],[(0,1),(7,3)],[(3,0),(7,5)]]
+#lines = [[(0,2),(7,2)],[(0,1),(7,3)],[(3,0),(7,5)]]
 #lines = [[(1,-2),(3,7)],[(0,2),(8,4)],[(1,5),(9,-4)],[(3,3),(11,7)],[(4,5),(6,3)],[(-1,6),(12,6)]]
 #lines = [[(0,2),(8,4)],[(1,5),(9,-4)],[(3,3),(11,7)]]
-#lines = [[(1,1),(5,2)],[(1,3),(5,5)],[(1,2),(5,1)],[(1,5),(5,3)]]
+lines = [[(1,1),(5,2)],[(1,3),(5,5)],[(1,2),(5,1)],[(1,5),(5,3)]]
 print(swipe(lines))
