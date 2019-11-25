@@ -40,17 +40,34 @@ class Point:
 
     def as_tuple(self):
         return (self.x, self.y)
+    
+    def __str__(self):
+        return str(self.as_tuple())
+    
+    def __hash__(self):
+        return hash((self.x, self.y))
+    
 class Line:
-    def __init__(self, a,b):
-        self.point_a = min([a,b], key=lambda point: point.as_tuple()) 
-        self.point_b = max([a,b], key=lambda point: point.as_tuple()) 
+    def __init__(self, a=0,b=0, raw_line = None):
+        if raw_line is None:
+            self.point_a = min([a,b], key=lambda point: point.as_tuple()) 
+            self.point_b = max([a,b], key=lambda point: point.as_tuple()) 
+        else:
+            self.point_a = Point(raw_line[0][0], raw_line[0][1])
+            self.point_b = Point(raw_line[1][0], raw_line[1][1])
 
     def round_cords(self, r=4):
         self.point_a.round_cords(r)
         self.point_b.round_cords(r)
 
     def __hash__(self):
-        return hash((self.point_a.as_tuple(), self.point_b.as_tuple()))
+        return hash(self.point_a)+hash(self.point_b)
+    
+    def __str__(self):
+        return str([self.point_a.as_tuple(), self.point_b.as_tuple()])
+
+    def as_raw(self):
+        return (self.point_a.as_tuple(), self.point_b.as_tuple())
 
 class Circle:
     def __init__(self, r, c):
@@ -77,23 +94,34 @@ class Triangle:
             return False
         else:
             return True
+    
+    def as_raw(self):
+        return [self.line_a.as_raw(), self.line_b.as_raw(), self.line_c.as_raw()]
 
+    def __hash__(self):
+        return hash((self.point_a.as_tuple(), self.point_b.as_tuple(), self.point_c.as_tuple()))
+    
 def delunay(points):
     triangulation = set()
 
     points = [Point(point[0], point[1]) for point in points]
-
+    
+    for point in points:
+        point.round_cords(5)
+        
     max_x = max(points, key=lambda point: point.x).x
     min_x = min(points, key=lambda point: point.x).x
     max_y = max(points, key=lambda point: point.y).y
     min_y = min(points, key=lambda point: point.y).y
 
-    v_point_1 = Point(min_x, min_y)
-    v_point_2 = Point(max_x, min_y)
-    v_point_3 = Point(max_x, max_y)
-    v_point_4 = Point(min_x, max_y)
+    v_point_1 = Point(min_x-1, min_y-1)
+    v_point_2 = Point(max_x+1, min_y-1)
+    v_point_3 = Point(max_x+1, max_y+1)
+    v_point_4 = Point(min_x-1, max_y+1)
 
-#    points = points + [v_point_1, v_point_2, v_point_3, v_point_4]
+    bounding_verticies = {v_point_1.as_tuple(), v_point_2.as_tuple(), v_point_3.as_tuple(), v_point_4.as_tuple()}
+
+    points = points + [v_point_1, v_point_2, v_point_3, v_point_4]
 
     super_tri_1 = Triangle(v_point_1, v_point_2, v_point_4)
     super_tri_2 = Triangle(v_point_2, v_point_3, v_point_4)
@@ -102,39 +130,49 @@ def delunay(points):
     triangulation.add(super_tri_2)
 
     for point in points:
-        polygon = set()
+        polygon = []
         bad_triangles = []    
         for tri in list(triangulation):
             if tri.in_circumcil(point): 
                 bad_triangles.append(tri)
-                if tri.line_a in polygon: ##wiecej niz dwa trojkaty nie beda wspoldzielic krawedzi???
-                    polygon.remove(tri.line_a)
+                if tri.line_a.as_raw() in polygon: ##wiecej niz dwa trojkaty nie beda wspoldzielic krawedzi???
+                    polygon.remove(tri.line_a.as_raw())
                 else:
-                    polygon.add(tri.line_a)
+                    polygon.append(tri.line_a.as_raw())
 
-                if tri.line_b in polygon:
-                    polygon.remove(tri.line_b)
+                if tri.line_b.as_raw() in polygon:
+                    polygon.remove(tri.line_b.as_raw())
                 else:
-                    polygon.add(tri.line_b)
+                    polygon.append(tri.line_b.as_raw())
 
-                if tri.line_c in polygon:
-                    polygon.remove(tri.line_c)
+                if tri.line_c.as_raw() in polygon:
+                    polygon.remove(tri.line_c.as_raw())
                 else:
-                    polygon.add(tri.line_c)
+                    polygon.append(tri.line_c.as_raw())
         
         for tri in bad_triangles:
             triangulation.remove(tri)
-        
+
+        polygon = [Line(raw_line=line) for line in polygon]
         for line in list(polygon):
             try:
                 t = Triangle(point, line.point_a, line.point_b)
             except:
                 t = None
             
-            if t:
+            if not(t is None):
                 triangulation.add(t)
 
-    return triangulation
+    result = []
+    for tri in triangulation:
+        if tri.point_a.as_tuple() in bounding_verticies or tri.point_b.as_tuple() in bounding_verticies or tri.point_c.as_tuple() in bounding_verticies:
+            pass
+        else:
+            result.append(tri)
+
+
+    return result
+
 
 
 
@@ -146,5 +184,6 @@ def delunay(points):
 # print(t.in_circumcil(Point(1,1)))
 
 ### Test triangulacji
-points = [(0,0),(2,0),(1,1),(1,2)]
-delunay(points)
+#points = [(0,0),(2,0),(1,1),(1,2)]
+points = [(0,0),(2,0),(1,1.75),(1.,2.)]
+print(len(delunay(points)))
