@@ -54,7 +54,12 @@ class Graph() :
             del self.map[triangle]
 
     def get_neighbours(self, triangle):
+        if(triangle not in self.map):
+             return []
         return self.map[triangle]
+
+    def to_list(self):
+        return self.map.keys()
 
 class TriangleIterator:
     def __init__(self, triangle_graph, triangle, point):
@@ -68,10 +73,10 @@ class TriangleIterator:
         if len(self.queue) > 0:
             triangle_to_ret = self.queue.pop(0)
             neighbours = self.triangle_graph.get_neighbours(triangle_to_ret)
-
     
-            bad_neighbours = filter(lambda tri:tri in self.visited and tri.in_circumcil(self.point),neighbours)
-            
+            bad_neighbours = list(filter(lambda tri: tri not in self.visited and tri.in_circumcil(self.point),neighbours))
+            for tri in bad_neighbours:
+                self.visited.add(tri)
             self.queue = self.queue + bad_neighbours
             return triangle_to_ret
         else:
@@ -82,8 +87,9 @@ class TrianglesSet:
     def __init__(self):
         self.graph = Graph()
         self.quadtree = []
-        self.triangle
-
+        self.triangle = None
+        self.point = None
+        
     def __iter__(self):
         return TriangleIterator(self.graph, self.triangle, self.point)
 
@@ -97,12 +103,15 @@ class TrianglesSet:
         self.point = point
 
     def add(self, triangle):
+        self.quadtree.append(triangle)
         self.graph.add_triangle(triangle)
 
-    def remove(self, trinagle):
-        self.graph.remove_triangle(trinagle)
+    def remove(self, triangle):
+        self.quadtree.remove(triangle)
+        self.graph.remove_triangle(triangle)
         # remove also from quad tree
-
+    def to_list(self):
+        return self.graph.to_list()
 
 def circle_on_three_points(p1,p2,p3):
     A = np.array([
@@ -146,7 +155,6 @@ class Point:
         return str(self.as_tuple())
     
     def __hash__(self):
-        print("Hash punktu")
         return hash((self.x, self.y))
     
 class Line:
@@ -163,7 +171,6 @@ class Line:
         self.point_b.round_cords(r)
 
     def __hash__(self):
-        print("Hash lini")
         return hash(self.as_raw())
     
     def __str__(self):
@@ -208,9 +215,11 @@ class Triangle:
     
     def __eq__(self, value):
         return self.circle.center.as_tuple() == value.circle.center.as_tuple() 
-    
+
 def delunay(points):
-    triangulation = set()
+    #triangulation = set()
+
+    triangulation = TrianglesSet()
 
     points = [Point(point[0], point[1]) for point in points]
     
@@ -239,8 +248,9 @@ def delunay(points):
 
     for point in points:
         polygon = []
-        bad_triangles = []    
-        for tri in list(triangulation):
+        bad_triangles = []
+        triangulation.update(point)
+        for tri in triangulation:
             if tri.in_circumcil(point): 
                 bad_triangles.append(tri)
                 if tri.line_a.as_raw() in polygon: ##wiecej niz dwa trojkaty nie beda wspoldzielic krawedzi???
@@ -272,7 +282,8 @@ def delunay(points):
                 triangulation.add(t)
 
     result = []
-    for tri in triangulation:
+
+    for tri in triangulation.to_list():
         if tri.point_a.as_tuple() in bounding_verticies or tri.point_b.as_tuple() in bounding_verticies or tri.point_c.as_tuple() in bounding_verticies:
             pass
         else:
@@ -280,41 +291,3 @@ def delunay(points):
 
 
     return result
-
-
-
-
-### Test punktu w okregu
-# t = Triangle(Point(0,0), Point(0,1), Point(1,0))
-# print(hash(t))
-# print(t.in_circumcil(Point(0,0)))
-# print(t.in_circumcil(Point(0.5,0.5)))
-# print(t.in_circumcil(Point(1,1)))
-
-### Test triangulacji
-#points = [(0,0),(2,0),(1,1),(1,2)]
-# points = [(0,0),(2,0),(1,1.75),(1.,2.)]
-# print(len(delunay(points)))
-
-t1 = Triangle(Point(0,0),Point(5,0),Point(2,3))
-t2 = Triangle(Point(0,0),Point(2,5),Point(2,3))
-t3 = Triangle(Point(5,0),Point(2,3),Point(2,5))
-
-g = Graph()
-g.add_triangle(t1)
-g.add_triangle(t2)
-g.add_triangle(t3)
-print([tri.as_raw() for tri in g.get_neighbours(t1)])
-t5 = Triangle(Point(5,0),Point(2,3),Point(2,5))
-g.remove_triangle(t5)
-print([tri.as_raw() for tri in g.get_neighbours(t1)])
-
-s = set()
-s.add(t1)
-s.add(t2)
-
-print(t5 in s)
-s.add(t3)
-print(t5 in s)
-
-
