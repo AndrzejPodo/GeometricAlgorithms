@@ -95,9 +95,29 @@ class TrianglesSet:
     def __iter__(self):
         return TriangleIterator(self.graph, self.triangle, self.point)
 
+    # def update(self, point):
+    #     tri_center = self.kdtree.search_nn(point.as_tuple())[0].data
+    #     self.triangle = self.centerToTriangleMapping[tri_center]
+    #     self.point = point
+
     def update(self, point):
+        removed_points = []
+        
         tri_center = self.kdtree.search_nn(point.as_tuple())[0].data
         self.triangle = self.centerToTriangleMapping[tri_center]
+        self.kdtree = self.kdtree.remove(tri_center)
+        removed_points.append(tri_center)
+        while not self.triangle.in_circumcil(point):
+            self.kdtree = self.kdtree.remove(tri_center)
+            removed_points.append(tri_center)
+            debug_var = self.kdtree.search_nn(point.as_tuple())
+            tri_center = debug_var[0].data
+            print(tri_center)
+            self.triangle = self.centerToTriangleMapping[tri_center]
+        
+        for p in removed_points:
+            self.kdtree.add(p)
+            
         self.point = point
 
     def add(self, triangle):
@@ -107,7 +127,7 @@ class TrianglesSet:
 
     def remove(self, triangle):
         del self.centerToTriangleMapping[triangle.circle.center.as_tuple()]
-        self.kdtree.remove(triangle.circle.center.as_tuple())
+        self.kdtree = self.kdtree.remove(triangle.circle.center.as_tuple())
         self.graph.remove_triangle(triangle)
         # remove also from quad tree
     def to_list(self):
@@ -188,6 +208,7 @@ class Circle:
     def __init__(self, r, c):
         self.radius = r
         self.center = c
+        self.center.round_cords(5)
 
 class Triangle:
     def __init__(self, a, b, c):
@@ -229,25 +250,25 @@ def delunay(points):
     for point in points:
         point.round_cords(5)
         
-    max_x = max(points, key=lambda point: point.x).x
-    min_x = min(points, key=lambda point: point.x).x
-    max_y = max(points, key=lambda point: point.y).y
-    min_y = min(points, key=lambda point: point.y).y
+    max_x = max(points, key=lambda point: point.x).x+1
+    min_x = min(points, key=lambda point: point.x).x-1
+    max_y = max(points, key=lambda point: point.y).y+1
+    min_y = min(points, key=lambda point: point.y).y-1
 
-    v_point_1 = Point(min_x-1, min_y-1)
-    v_point_2 = Point(max_x+1, min_y-1)
-    v_point_3 = Point(max_x+1, max_y+1)
-    v_point_4 = Point(min_x-1, max_y+1)
+    v_point_1 = Point(min_x, min_y)
+    v_point_2 = Point(max_x, min_y)
+    v_point_3 = Point((max_x+min_x)/2, 2*max_y-min_y)
+    # v_point_4 = Point(min_x-1, max_y+1)
 
-    bounding_verticies = {v_point_1.as_tuple(), v_point_2.as_tuple(), v_point_3.as_tuple(), v_point_4.as_tuple()}
+    bounding_verticies = {v_point_1.as_tuple(), v_point_2.as_tuple(), v_point_3.as_tuple()}
 
-    points = points + [v_point_1, v_point_2, v_point_3, v_point_4]
+    points = points + [v_point_1, v_point_2, v_point_3]
 
-    super_tri_1 = Triangle(v_point_1, v_point_2, v_point_4)
-    super_tri_2 = Triangle(v_point_2, v_point_3, v_point_4)
+    super_tri_1 = Triangle(v_point_1, v_point_2, v_point_3)
+    # super_tri_2 = Triangle(v_point_2, v_point_3, v_point_4)
 
     triangulation.add(super_tri_1)
-    triangulation.add(super_tri_2)
+    # triangulation.add(super_tri_2)
 
     for point in points:
         polygon = []
@@ -296,6 +317,6 @@ def delunay(points):
     return result
 
 
-points = [(0.15012034754599296, 0.23840086315142034), (0.786612283029864, 0.20469988275926349), (0.768870347545993, 0.6731435102102439), (0.5648380894814768, 0.9259008631514203)]
+points = [(3, 2), (1, 1), (5, 8)]
 
 print(len(delunay(points)))
