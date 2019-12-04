@@ -3,6 +3,8 @@ import numpy as np
 import kdtree 
 from scipy.spatial import distance
 
+EPS = 3
+
 class Graph() :
     def __init__(self):
         self.map = dict()
@@ -95,24 +97,18 @@ class TrianglesSet:
     def __iter__(self):
         return TriangleIterator(self.graph, self.triangle, self.point)
 
-    # def update(self, point):
-    #     tri_center = self.kdtree.search_nn(point.as_tuple())[0].data
-    #     self.triangle = self.centerToTriangleMapping[tri_center]
-    #     self.point = point
-
     def update(self, point):
         removed_points = []
         
         tri_center = self.kdtree.search_nn(point.as_tuple())[0].data
         self.triangle = self.centerToTriangleMapping[tri_center]
-        self.kdtree = self.kdtree.remove(tri_center)
-        removed_points.append(tri_center)
+        
         while not self.triangle.in_circumcil(point):
             self.kdtree = self.kdtree.remove(tri_center)
             removed_points.append(tri_center)
             debug_var = self.kdtree.search_nn(point.as_tuple())
             tri_center = debug_var[0].data
-            print(tri_center)
+            #kdtree.visualize(self.kdtree)
             self.triangle = self.centerToTriangleMapping[tri_center]
         
         for p in removed_points:
@@ -208,7 +204,7 @@ class Circle:
     def __init__(self, r, c):
         self.radius = r
         self.center = c
-        self.center.round_cords(5)
+        self.center.round_cords(EPS)
 
 class Triangle:
     def __init__(self, a, b, c):
@@ -248,16 +244,16 @@ def delunay(points):
     points = [Point(point[0], point[1]) for point in points]
     
     for point in points:
-        point.round_cords(5)
+        point.round_cords(EPS)
         
     max_x = max(points, key=lambda point: point.x).x+1
     min_x = min(points, key=lambda point: point.x).x-1
     max_y = max(points, key=lambda point: point.y).y+1
     min_y = min(points, key=lambda point: point.y).y-1
 
-    v_point_1 = Point(min_x, min_y)
-    v_point_2 = Point(max_x, min_y)
-    v_point_3 = Point((max_x+min_x)/2, 2*max_y-min_y)
+    v_point_1 = Point(round(min_x-(max_x-min_x)/2,EPS), min_y)
+    v_point_2 = Point(round(max_x+(max_x-min_x)/2,EPS), min_y)
+    v_point_3 = Point(round((max_x+min_x)/2,EPS), round(2*max_y-min_y, EPS))
     # v_point_4 = Point(min_x-1, max_y+1)
 
     bounding_verticies = {v_point_1.as_tuple(), v_point_2.as_tuple(), v_point_3.as_tuple()}
@@ -317,6 +313,8 @@ def delunay(points):
     return result
 
 
-points = [(3, 2), (1, 1), (5, 8)]
-
+# points = [(94.0763127264591, 28.428745676369658), (-46.497128693305065, -37.40032718707895), (47.400719116640744, 21.819910803485527), (-49.22757698069056, 66.50788135799692), (-16.68004719623839, -67.4448804280598), (-80.35560829929767, -23.800561071483344)]
+# points = [(76.2531699979983, -98.05092993300313), (82.24739551803415, 34.69823657711024), (86.69393854638233, -49.28074763752854), (78.26400485407024, 85.43229928985286), (41.19331806407706, 42.23471348335761), (-22.897808718818453, 18.171879521264117)]
+#points = [(35.63777803632581, -85.06909870996905), (-48.99820106914661, -1.6016653156986536), (5.881387699744394, 70.71104238180357), (-24.233301365485204, 5.583781768558026), (-59.23286149560904, -19.45005659005838), (64.89026973134989, -34.26736641284134)]
+points = [(85.09794612847179, 80.9933710580772), (46.27670000720104, -53.024500903772086), (62.796156161736405, 94.87712415102283), (-7.180721786279179, -68.23786434363363), (44.17976003400457, 59.518867168084455), (84.94845393190349, 21.901669400881033)]
 print(len(delunay(points)))
